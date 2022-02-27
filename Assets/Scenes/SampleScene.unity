@@ -554,8 +554,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 72, y: -104.5}
-  m_SizeDelta: {x: 1400, y: 400}
+  m_AnchoredPosition: {x: 214.78, y: -73}
+  m_SizeDelta: {x: 2469.5647, y: 356.0453}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1107044283
 MonoBehaviour:
@@ -590,7 +590,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ifconfig
+  m_Text: 'southwest university
+
+'
 --- !u!222 &1107044284
 CanvasRenderer:
   m_ObjectHideFlags: 0

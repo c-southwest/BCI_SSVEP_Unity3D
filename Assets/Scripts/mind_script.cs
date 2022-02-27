@@ -9,6 +9,8 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 using Newtonsoft.Json;
+using System.Runtime.InteropServices;
+using System.IO;
 
 public class mind_script : MonoBehaviour
 {
@@ -20,7 +22,7 @@ public class mind_script : MonoBehaviour
     // for socket
     public int port = 8080;
     IPAddress serverAddress = IPAddress.Parse("127.0.0.1");
-    bool received = false;
+    int received = -1;
     byte[] buffer = new byte[2048];
     Socket socket;
     // tree
@@ -63,6 +65,8 @@ public class mind_script : MonoBehaviour
         queue.Enqueue("Linux");
         queue.Enqueue("Discord");
         queue.Enqueue("Backspace");
+        queue.Enqueue("Speek");
+        queue.Enqueue("Clear");
         head = new QuadTree();
         int depth = 1;
         QuadTree.Build(head, queue, depth, 3);
@@ -93,6 +97,7 @@ public class mind_script : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Keypad4) & confirmed == false) StartCoroutine(Confirmed(four));
         // Test
         if (Input.GetKeyUp(KeyCode.Keypad9) & confirmed == false) Discord("test");
+        if (received > 0 & confirmed == false) StartCoroutine(Confirmed(received));
     }
 
     IEnumerator Confirmed(float freq)
@@ -167,6 +172,12 @@ public class mind_script : MonoBehaviour
                 case "Space":
                     msg.text += " ";    // 空格
                     return true;
+                case "Speek":
+                    Speeker.Speek(msg.text);
+                    return true;
+                case "Clear":
+                    msg.text = "";
+                    return true;
                 default:
                     return false;
             }
@@ -177,6 +188,7 @@ public class mind_script : MonoBehaviour
 
         confirmed = false;
         selectedFreq = -1;
+        received = -1;
         yield return null;
     }
 
@@ -196,12 +208,24 @@ public class mind_script : MonoBehaviour
                 else
                 {
                     string str = Encoding.Default.GetString(buffer, 0, result);
+                    if (str == "0")
+                    {
+                        received = 7;
+                    }
                     if (str == "1")
                     {
-                        Debug.Log("Confirm");
-                        received = true;
-
+                        received = 8;
                     }
+                    if (str == "2")
+                    {
+                        received = 9;
+                    }
+                    if (str == "3")
+                    {
+                        received = 10;
+                    }
+                    Debug.Log("Confirm");
+                    
                     Debug.Log($"接收到数据：{str}");
 
                 }
@@ -279,6 +303,61 @@ public class mind_script : MonoBehaviour
         {
             this.text = text;
             this.key = key;
+        }
+    }
+
+
+    static class Speeker
+    {
+        static public void Speek(string message)
+        {
+
+            string err = "Do not include special character 请不要包含特殊字符";
+            var p = new System.Diagnostics.Process();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // tts.ps1 
+                string content = @"param(
+    # Parameter help description
+    [Parameter()]
+    [string]
+    $message
+)
+Add-Type -AssemblyName System.Speech
+$Speech = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$Speech.Speak($message)";
+                Console.WriteLine(content);
+
+                if (File.Exists("tts.ps1"))
+                {
+                    Console.WriteLine(Directory.GetCurrentDirectory());
+                }
+                else
+                {
+                    // Write file
+                    using (StreamWriter sw = new StreamWriter("tts.ps1"))
+                    {
+                        sw.Write(content);
+                    }
+                }
+                p.StartInfo.FileName = "powershell";
+                p.StartInfo.Arguments = $@"powershell -ExecutionPolicy Bypass -File .\tts.ps1 '{message}'";
+                p.StartInfo.CreateNoWindow = true;
+                p.StartInfo.UseShellExecute = false;
+            }
+            else
+            {
+                p.StartInfo.FileName = "espeak-ng";
+                p.StartInfo.Arguments = $@" -vzh '{message}'";
+            }
+
+            p.Start();
+            p.WaitForExit();
+            if (p.ExitCode == 1)
+            {
+                p.StartInfo.Arguments = $@"powershell -ExecutionPolicy Bypass -File .\tts.ps1 '{err}'";
+                p.Start();
+            }
         }
     }
 }

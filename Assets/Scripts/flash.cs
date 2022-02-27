@@ -41,7 +41,8 @@ public class flash : MonoBehaviour
         while (true)
         {
             yield return new WaitForSecondsRealtime(1 / (2 * frequency));
-            if (mind_scr.selectedFreq != frequency) img.color = (img.color == Color.red) ? Color.black : Color.red;
+            //if (mind_scr.selectedFreq != frequency) img.color = (img.color == Color.red) ? Color.black : Color.red;
+            if (mind_scr.selectedFreq != frequency) img.color = (img.color == Color.white) ? Color.black : Color.white;
         }
     }
 }
